@@ -4,6 +4,7 @@ import model.Cliente;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ClienteDAO {
 
@@ -112,4 +113,61 @@ public class ClienteDAO {
         }
         return clientes;
     }
+
+    /**
+     * Busca um cliente específico no banco de dados pelo seu ID (chave primária).
+     *
+     * @param id O ID (n_numeclien) do cliente a ser buscado.
+     * @return Um Optional contendo o objeto Cliente se um registro for encontrado.
+     * Retorna um Optional vazio se nenhum cliente for encontrado com o ID fornecido.
+     */
+    public Optional<Cliente> buscarPorId(int id) {
+        // 1. A query SQL para selecionar um registro específico pela chave primária
+        String sql = "SELECT * FROM comclien WHERE n_numeclien = ?";
+
+        // 2. Usamos try-with-resources para gerenciar a conexão e o statement
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 3. Define o valor do placeholder (?) como o ID recebido
+            pstmt.setInt(1, id);
+
+            // 4. Executa a query e obtém o resultado
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                // 5. Verifica se o ResultSet retornou algum registro.
+                if (rs.next()) {
+                    // --- CENÁRIO 1: CLIENTE ENCONTRADO ---
+
+                    // Cria uma nova instância do objeto Cliente
+                    Cliente cliente = new Cliente();
+
+                    // Popula o objeto com os dados retornados do banco de dados
+                    cliente.setId(rs.getInt("n_numeclien"));
+                    cliente.setCodigo(rs.getString("c_codiclien"));
+                    cliente.setNome(rs.getString("c_nomeclien"));
+                    cliente.setRazaoSocial(rs.getString("c_razaclien"));
+                    cliente.setDataCadastro(rs.getDate("d_dataclien").toLocalDate()); // Converte sql.Date para time.LocalDate
+                    cliente.setCnpj(rs.getString("c_cnpjclien"));
+                    cliente.setTelefone(rs.getString("c_foneclien"));
+                    cliente.setCidade(rs.getString("c_cidaclien"));
+                    cliente.setEstado(rs.getString("c_estaclien"));
+
+                    // Retorna um Optional "cheio", contendo o objeto cliente.
+                    // A execução do método para aqui.
+                    return Optional.of(cliente);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Ocorreu um erro ao buscar o cliente por ID: " + e.getMessage());
+            // Lançar uma exceção de runtime é uma abordagem comum para erros de infraestrutura
+            throw new RuntimeException("Erro de banco de dados ao buscar cliente.", e);
+        }
+
+        // --- CENÁRIO 2: CLIENTE NÃO ENCONTRADO ---
+        // Se o código chegou até aqui, o `if (rs.next())` foi falso.
+        // Nenhum registro foi encontrado, então retornamos um Optional "vazio".
+        return Optional.empty();
+    }
+
 }
