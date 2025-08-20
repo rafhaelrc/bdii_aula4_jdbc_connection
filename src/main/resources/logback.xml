@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Configura uma "saída" de log para o console. Você continuará vendo os logs na sua IDE enquanto executa o programa. -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- Configura uma segunda "saída", desta vez para um arquivo. -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/aplicacao.log</file> <!-- Especifica que o arquivo de log se chamará aplicacao.log e será salvo dentro de uma pasta logs. Quando você rodar o projeto, essa pasta será criada na raiz do seu projeto. -->
+        <encoder>
+            <!-- Define o formato de cada linha de log -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- Este é o "chefe" de todos os loggers. -->
+    <root level="INFO">
+        <!-- Ativa os appenders que definimos. Aqui, estamos dizendo: "Envie todos os logs de nível INFO ou superior tanto para o CONSOLE quanto para o FILE". -->
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+</configuration>
